@@ -1,0 +1,71 @@
+\name{BaSAR.auto}
+\alias{BaSAR.auto}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{BSA automatic model comparison}
+\description{Function for automated model comparison which stops adding background functions when model ratio > 1.}
+\usage{
+BaSAR.auto(data, start, stop, nsamples, nbackg, interval)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{data}{data as a 1-dimensional vector}
+  \item{start}{lower limit of period of interest, in seconds}
+  \item{stop}{upper limit of period of interest, in seconds}
+  \item{nsamples}{number of samples within the interval start-stop}
+  \item{nbackg}{number of background functions to be added to the model}
+  \item{interval}{interval between data points, in seconds}
+}
+\details{
+%%  ~~ If necessary, more details than the description above ~~
+This is a wrapper function that uses \code{\link{BaSAR.modelratio}}, and automatically adds more background functions until the model ratio is > 1, or the maximum number of background functions (\code{nbackg}) has been reached. It will warn if the max was reached first, instead of the modelratio goal. 
+
+Plot log of posterior probability distribution and visually inspect if there are additional frequencies present. If there are, \code{\link{BaSAR.nest}} should be used instead for model comparison.
+}
+\value{
+A list containing:
+\item{normp}{1D normalized posterior distribution over omega}
+\item{omega}{1D vector of the omega sampled}
+\item{stats}{list of statistics from the probability distribution}
+\item{modelratio}{final model ratio}
+\item{model}{no of background functions added to the model}
+}
+\references{
+%% ~put references to the literature/web site here ~
+Granqvist, E., Oldroyd, G. E. and Morris, R. J. (2011) Automated Bayesian model development for frequency detection in biological time series. \emph{BMC Syst Biol} \bold{5}, 97.\cr
+\url{http://dx.doi.org/10.1186/1752-0509-5-97} 
+
+Bretthorst, G. L. (1988) Bayesian spectrum analysis and parameter estimation. \emph{Lecture notes 
+in statistics.} New York: Springer-Verlag.
+}
+\author{
+%%  ~~who you are~~
+Emma Granqvist, Matthew Hartley and Richard J Morris.
+}
+
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{BaSAR.modelratio}}, 
+\code{\link{BaSAR.post}}
+}
+\examples{
+require(polynom)
+require(orthopolynom)
+# Create time series with omega = 0.5 and a background trend
+tpoints = seq(from=1, to=200, length=200)
+dpoints = sin(0.5 * tpoints) - tpoints ^ 2 * 0.005 + 0.1 * rnorm(200, 0, 1)
+# Plot time series
+plot(dpoints, type="l", col="blue", xlab="t", ylab="d(t)")
+# Run BaSAR with automated model selection for background trends
+# up to a max of 4 background functions in this example
+r = BaSAR.auto(dpoints, 6, 600, 100, 4, 1)
+# Plot the resulting posterior density function, and check which model was selected
+plot(r$omega, r$normp, xlim=c(0:1), type="h", col="red", ylab="PDF",
+xlab=expression(omega))
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+%\keyword{ models }
+%\keyword{ background }% __ONLY ONE__ keyword per line

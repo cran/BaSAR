@@ -1,0 +1,27 @@
+citHeader("To cite package 'BaSAR' in publications use:")
+
+## R >= 2.8.0 passes package metadata to citation().
+if(!exists("meta") || is.null(meta)) meta <- packageDescription("BaSAR")
+year <- sub("-.*", "", meta$Date)
+note <- sprintf("R package version %s.", meta$Version)
+
+citEntry(entry = "Manual",
+	 title = {
+             paste("BaSAR: Bayesian Spectrum Analysis of time series data")
+         },
+	 author = personList(
+           person("Emma", "Granqvist",
+                  email = "emma.granqvist@jic.ac.uk"),
+           person("Matthew", "Hartley",
+                  email = "matthew.hartley@jic.ac.uk"),
+           person("Richard", "Morris",
+                  email = "richard.morris@jic.ac.uk")),
+         year = 2011,
+	note  = vers,
+	 url = "http://CRAN.R-project.org/package=BaSAR",
+	 textVersion = {
+             paste("Emma Granqvist and Matthew Hartley and Richard J Morris",
+	           sprintf("(%s).", year),
+                   "BaSAR: Bayesian Spectrum Analysis of time series data",
+                   note)
+         })
