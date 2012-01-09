@@ -10,8 +10,8 @@ Bayesian Spectrum Analysis of time series data
 \tabular{ll}{
 Package: \tab BaSAR\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2011-12-14\cr
+Version: \tab 1.1\cr
+Date: \tab 2012-01-09\cr
 Repository: \tab CRAN\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr

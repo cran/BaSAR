@@ -49,9 +49,7 @@ Emma Granqvist, Matthew Hartley and Richard J Morris.
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+
 \examples{
 # Create time series with omega = 0.5 and 0.3, plus noise
 tpoints = seq(from=1, to=200, length=200)

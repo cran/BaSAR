@@ -17,7 +17,7 @@ citEntry(entry = "Manual",
            person("Richard", "Morris",
                   email = "richard.morris@jic.ac.uk")),
          year = 2011,
-	note  = vers,
+	note  = "version 1.1",
 	 url = "http://CRAN.R-project.org/package=BaSAR",
 	 textVersion = {
              paste("Emma Granqvist and Matthew Hartley and Richard J Morris",

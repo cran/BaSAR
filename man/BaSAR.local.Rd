@@ -48,6 +48,7 @@ Emma Granqvist, Matthew Hartley and Richard J Morris
 \code{\link{BaSAR.post}}
 }
 \examples{
+require(fields)
 # Create time series with changing omega
 tpoints = seq(from=1, to=200, length=200)
 dpoints <- c()
