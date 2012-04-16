@@ -4,7 +4,7 @@
 \title{BSA automatic model comparison}
 \description{Function for automated model comparison which stops adding background functions when model ratio > 1.}
 \usage{
-BaSAR.auto(data, start, stop, nsamples, nbackg, interval)
+BaSAR.auto(data, start, stop, nsamples, nbackg, tpoints)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -13,7 +13,7 @@ BaSAR.auto(data, start, stop, nsamples, nbackg, interval)
   \item{stop}{upper limit of period of interest, in seconds}
   \item{nsamples}{number of samples within the interval start-stop}
   \item{nbackg}{number of background functions to be added to the model}
-  \item{interval}{interval between data points, in seconds}
+  \item{tpoints}{vector of time points, in seconds}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -60,7 +60,7 @@ dpoints = sin(0.5 * tpoints) - tpoints ^ 2 * 0.005 + 0.1 * rnorm(200, 0, 1)
 plot(dpoints, type="l", col="blue", xlab="t", ylab="d(t)")
 # Run BaSAR with automated model selection for background trends
 # up to a max of 4 background functions in this example
-r = BaSAR.auto(dpoints, 6, 600, 100, 4, 1)
+r = BaSAR.auto(dpoints, 6, 600, 100, 4, tpoints)
 # Plot the resulting posterior density function, and check which model was selected
 plot(r$omega, r$normp, xlim=c(0:1), type="h", col="red", ylab="PDF",
 xlab=expression(omega))

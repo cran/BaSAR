@@ -4,7 +4,7 @@
 \title{Normalized posterior}
 \description{A normalised posterior of the frequency in the chosen range.}
 \usage{
-BaSAR.post(data, start, stop, nsamples, nbackg, interval)
+BaSAR.post(data, start, stop, nsamples, nbackg, tpoints)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -13,7 +13,7 @@ BaSAR.post(data, start, stop, nsamples, nbackg, interval)
   \item{stop}{upper limit of period of interest, in seconds}
   \item{nsamples}{number of samples within the interval start-stop}
   \item{nbackg}{number of background functions to be added to the model}
-  \item{interval}{interval between data points, in seconds}
+  \item{tpoints}{vector of time points, in seconds}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -55,7 +55,7 @@ dpoints = sin(0.5 * tpoints) + 0.1 * rnorm(200, 0, 1)
 # Plot time series
 plot(dpoints, type="l", col="blue", xlab="t", ylab="d(t)")
 # Run BaSAR to get normalized posterior distirbution
-r <- BaSAR.post(dpoints, 6, 600, 100, 0, 1)
+r <- BaSAR.post(dpoints, 6, 600, 100, 0, tpoints)
 # Plot the resulting posterior density function
 plot(r$omega, r$normp, xlim=c(0:1), type="h", col="red", ylab="PDF",
 xlab=expression(omega))

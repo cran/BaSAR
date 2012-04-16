@@ -4,7 +4,7 @@
 \title{BSA model comparison}
 \description{Function for model comparison with background trends using model ratios.}
 \usage{
-BaSAR.modelratio(data, start, stop, nsamples, nbackg1, nbackg2, interval)
+BaSAR.modelratio(data, start, stop, nsamples, nbackg1, nbackg2, tpoints)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,7 +14,7 @@ BaSAR.modelratio(data, start, stop, nsamples, nbackg1, nbackg2, interval)
   \item{nsamples}{number of samples within the interval start-stop}
   \item{nbackg1}{number of background functions to be added to 1st model}
   \item{nbackg2}{number of background functions to be added to 2nd model}
-  \item{interval}{interval between data points, in seconds}
+  \item{tpoints}{vector of time points, in seconds}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -68,11 +68,11 @@ dpoints = sin(0.5 * tpoints) - tpoints ^ 2 * 0.005 + 0.1 * rnorm(200, 0, 1)
 plot(dpoints, type="l", col="blue", xlab="t", ylab="d(t)")
 # Run BSA with model comparison for background trends
 # 1,2 background functions in this example
-r = BaSAR.modelratio(dpoints, 6, 30, 100, 1, 2, 1)
+r = BaSAR.modelratio(dpoints, 6, 30, 100, 1, 2, tpoints)
 # r$modelratio < 1 , add more background functions!
 # Run BaSAR with model comparison for background trends
 # 2,3 background functions in this example
-r = BaSAR.modelratio(dpoints, 6, 600, 100, 2, 3, 1)
+r = BaSAR.modelratio(dpoints, 6, 600, 100, 2, 3, tpoints)
 # This ratio is above 1, i.e. the model with 2 bg funcs has been selected
 # Plot the resulting posterior density function
 plot(r$omega, r$normp, xlim=c(0:1), type="h", col="red", ylab="PDF",

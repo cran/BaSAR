@@ -3,6 +3,8 @@
 # Emma Granqvist, Matthew Hartley and Richard J Morris
 ##################################################################################
 
+require(polynom)
+require(orthopolynom)
 
 ##################################################################################
 # Basic functions
@@ -102,8 +104,7 @@
 
 }
 
-.BSA.post1 <- function(data, interval, start, stop, nsamples, nbackg, normp) {
-    tpoints = .BSA.linspace(interval, length(data) * interval, length(data))
+.BSA.post1 <- function(data, tpoints, start, stop, nsamples, nbackg, normp) {
     start2 <- ((2*pi)/stop)
     stop2 <- ((2*pi)/start)
     omega <- numeric()
@@ -127,28 +128,9 @@
     return(list(omega=omega,logp=logp,p=p,noise=noise,power=power,signaltonoise=signaltonoise))
 }
 
-.BSA.post2 <- function(data, interval, start, stop, nsamples, nbackg, normp) {
-    tpoints = .BSA.linspace(interval, length(data) * interval, length(data))
-    omega <- numeric()
-    logp <- numeric()
-    p <- numeric()
-    noise <- numeric()
-    power <- numeric()
-    signaltonoise <- numeric()
-	
-    for (i in c(1:nsamples)) {
-		omega[i] = start + i * (stop - start) / nsamples
-		fpoints = .BSA.samplepoint(tpoints, omega[i], nbackg)
-		l = .BSA.prob(data, fpoints, normp)		
-		logp[i] = l$logST
-		p[i] = l$ST
-		noise[i] = l$sigma
-		power[i] = l$spden
-		signaltonoise[i] = l$signaltonoise
-        
-    }
-    return(list(omega=omega,logp=logp,p=p,noise=noise,power=power,signaltonoise=signaltonoise))
-}
+
+
+
 
 ##################################################################################
 # Downhill-simplex (amoeba) optimisation functions
@@ -240,7 +222,7 @@
 # Normalisation of posterior, and some stats of distributions over omega and period
 ##################################################################################
 
-.BSA.normalise <- function(data, interval, omega, p, nsamples, nbackg, logp_max, omega_range) {
+.BSA.normalise <- function(data, omega, p, nsamples, nbackg, logp_max, omega_range) {
     omegaN = omega_range / nsamples
     meanP = 0
     meanO = 0
@@ -290,15 +272,14 @@
 # User-availble functions for posterior
 ##################################################################################
 
-BaSAR.post <- function(data, start, stop, nsamples, nbackg, interval) {
+BaSAR.post <- function(data, start, stop, nsamples, nbackg, tpoints) {
     omega_range <- ((2*pi)/start) - ((2*pi)/stop)
-    tpoints = .BSA.linspace(interval, length(data) * interval, length(data))
-    r = .BSA.post1(data, interval, start, stop, nsamples, nbackg, 0)
-    r = .BSA.post1(data, interval, start, stop, nsamples, nbackg, max(r$logp))
+    r = .BSA.post1(data, tpoints, start, stop, nsamples, nbackg, 0)
+    r = .BSA.post1(data, tpoints, start, stop, nsamples, nbackg, max(r$logp))
     p = r$p
     omega = r$omega
     logp = r$logp
-    r = .BSA.normalise(data, interval, omega, p, nsamples, nbackg, max(logp), omega_range)
+    r = .BSA.normalise(data, omega, p, nsamples, nbackg, max(logp), omega_range)
     normp = r$norm_p
     omega = r$omega
     res = r$res
@@ -306,12 +287,12 @@ BaSAR.post <- function(data, start, stop, nsamples, nbackg, interval) {
     return(list(normp=normp, omega=omega, stats=res))
 }
 
-BaSAR.fine <- function(data, start, stop, nsamples, nbackg, interval) {
+
+BaSAR.fine <- function(data, start, stop, nsamples, nbackg, tpoints) {
     omega_range <- ((2*pi)/start) - ((2*pi)/stop)
     omegaN = omega_range * 0.05
-    tpoints = .BSA.linspace(interval, length(data) * interval, length(data))
-    r = .BSA.post1(data, interval, start, stop, nsamples, nbackg, 0)
-    r = .BSA.post1(data, interval, start, stop, nsamples, nbackg, max(r$logp))
+    r = .BSA.post1(data, tpoints, start, stop, nsamples, nbackg, 0)
+    r = .BSA.post1(data, tpoints, start, stop, nsamples, nbackg, max(r$logp))
     p = r$p
     maxp = 0
     for (j in c(1:nsamples)) {
@@ -320,12 +301,12 @@ BaSAR.fine <- function(data, start, stop, nsamples, nbackg, interval) {
             guess = r$omega[j]
         }
     }
-    normp = .BSA.normalise(data, interval, r$omega, r$p, nsamples, nbackg, max(r$logp), omega_range)
+    normp = .BSA.normalise(data, r$omega, r$p, nsamples, nbackg, max(r$logp), omega_range)
     s = .BSA.amoeba(1000, guess, omegaN*2, tpoints, nbackg, data)
     maxlogp = s$logp
     omega1 = s$omega1
 
-    r = BaSAR.post(data, (2*pi)/(omega1+omegaN), (2*pi)/(omega1-omegaN), nsamples, nbackg, interval)
+    r = BaSAR.post(data, (2*pi)/(omega1+omegaN), (2*pi)/(omega1-omegaN), nsamples, nbackg, tpoints)
     normp = r$normp
     omega = r$omega
     res = r$res
@@ -337,18 +318,17 @@ BaSAR.fine <- function(data, start, stop, nsamples, nbackg, interval) {
 # Model comparison using model ratios
 ##################################################################################
 
-.BSA.ratiocal <- function(data, interval, start, stop, nsamples, nbackg) {
+.BSA.ratiocal <- function(data, tpoints, start, stop, nsamples, nbackg) {
     omega_range = ((2*pi)/start) - ((2*pi)/stop)
     ndata = length(data)
-    tpoints = .BSA.linspace(interval, ndata * interval, ndata)
 
-    r = .BSA.post1(data, interval, start, stop, nsamples, nbackg, 0)
-    r = .BSA.post1(data, interval, start, stop, nsamples, nbackg, max(r$logp))
+    r = .BSA.post1(data, tpoints, start, stop, nsamples, nbackg, 0)
+    r = .BSA.post1(data, tpoints, start, stop, nsamples, nbackg, max(r$logp))
 
     p = r$p
     omega = r$omega
     logp = r$logp
-    normp = .BSA.normalise(data, interval, omega, p, nsamples, nbackg, max(logp), omega_range)
+    normp = .BSA.normalise(data, omega, p, nsamples, nbackg, max(logp), omega_range)
     
     logpmax = 0
 
@@ -388,21 +368,21 @@ BaSAR.fine <- function(data, start, stop, nsamples, nbackg, interval) {
 
 }
 
-.BSA.modelratio_auto <- function(data, start, stop, nsamples, nbackg, interval) {
+.BSA.modelratio_auto <- function(data, start, stop, nsamples, nbackg, tpoints) {
   for(i in c(0:nbackg)) {
     if (i==nbackg) {
-            r = BaSAR.post(data, start, stop, nsamples, i, interval)
+            r = BaSAR.post(data, start, stop, nsamples, i, tpoints)
             normp = r$normp
             omega = r$omega
             res = r$res
 			model = c("max reached:",i)
         } else {
-            ret = .BSA.ratiocal(data, interval, start, stop, nsamples, i)
+            ret = .BSA.ratiocal(data, tpoints, start, stop, nsamples, i)
             GL1_1 = ret$GL1
             GL2_1 = ret$GL2
             GL31_1 = ret$GL31
             GL4_1 = ret$GL6
-            ret = .BSA.ratiocal(data, interval, start, stop, nsamples, i+1)
+            ret = .BSA.ratiocal(data, tpoints, start, stop, nsamples, i+1)
             GL1 = ret$GL1
             GL2 = ret$GL2
             GL31 = ret$GL31
@@ -417,7 +397,7 @@ BaSAR.fine <- function(data, start, stop, nsamples, nbackg, interval) {
             ratio = 0
             ratio = ((GL1_1*GL2_1*GL4_1)/(GL1*GL2*GL4))*GL3;
             if (ratio>1) {
-                ret = BaSAR.post(data, start, stop, nsamples, i, interval)
+                ret = BaSAR.post(data, start, stop, nsamples, i, tpoints)
 				model = i
 				return(list(normp=ret$normp, omega=ret$omega,stats=ret$res,ratio=ratio,model=model))
             } 
@@ -427,7 +407,7 @@ BaSAR.fine <- function(data, start, stop, nsamples, nbackg, interval) {
     return(list(normp=normp, omega=omega,stats=res,ratio=ratio,model=model))
 }
 
-BaSAR.modelratio <- function(data, start, stop, nsamples, nbackg1, nbackg2, interval) {
+BaSAR.modelratio <- function(data, start, stop, nsamples, nbackg1, nbackg2, tpoints) {
 	if (nbackg1 < nbackg2)	{
 		model1 <- nbackg1
 	    model2 <- nbackg2
@@ -436,12 +416,12 @@ BaSAR.modelratio <- function(data, start, stop, nsamples, nbackg1, nbackg2, inte
 		model2 <- nbackg1
 	    model1 <- nbackg2
 	}
-            ret = .BSA.ratiocal(data, interval, start, stop, nsamples, model1)
+            ret = .BSA.ratiocal(data, tpoints, start, stop, nsamples, model1)
             GL1_1 = ret$GL1
             GL2_1 = ret$GL2
             GL31_1 = ret$GL31
             GL4_1 = ret$GL6
-            ret = .BSA.ratiocal(data, interval, start, stop, nsamples, model2)
+            ret = .BSA.ratiocal(data, tpoints, start, stop, nsamples, model2)
             GL1 = ret$GL1
             GL2 = ret$GL2
             GL31 = ret$GL31
@@ -456,17 +436,17 @@ BaSAR.modelratio <- function(data, start, stop, nsamples, nbackg1, nbackg2, inte
             ratio = 0
             ratio = ((GL1_1*GL2_1*GL4_1)/(GL1*GL2*GL4))*GL3;          
             if (ratio>1) {
-                ret = BaSAR.post(data, start, stop, nsamples, model1, interval)
+                ret = BaSAR.post(data, start, stop, nsamples, model1, tpoints)
             } else {
-				ret = BaSAR.post(data, start, stop, nsamples, model2, interval)
+				ret = BaSAR.post(data, start, stop, nsamples, model2, tpoints)
             }
 	
     return(list(normp=ret$normp, omega=ret$omega,stats=ret$res, modelratio=ratio))
 }
 
 
-BaSAR.auto <- function(data, start, stop, nsamples, nbackg, interval) {
-    r = .BSA.modelratio_auto(data, start, stop, nsamples, nbackg, interval)
+BaSAR.auto <- function(data, start, stop, nsamples, nbackg, tpoints) {
+    r = .BSA.modelratio_auto(data, start, stop, nsamples, nbackg, tpoints)
     normp = r$normp
     omega = r$omega
     stats = r$stats
@@ -479,7 +459,7 @@ BaSAR.auto <- function(data, start, stop, nsamples, nbackg, interval) {
 # BSA local - using windowing to get 2D posterior
 ##################################################################################
 
-BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
+BaSAR.local <- function(data, start, stop, nsamples, tpoints, nbackg, window) {
     n <- length(data)
     from <- 0
     tp <- 0
@@ -499,8 +479,9 @@ BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
 			to <- n
 		}
 		data2 <- data[from:to]
+		tpoints2 <- tpoints[from:to]
 		
-		r <- BaSAR.post(data2, start, stop, nsamples, 0, interval) 
+		r <- BaSAR.post(data2, start, stop, nsamples, nbackg, tpoints2) 
 		resultmatrix <- rbind(resultmatrix,r$normp)
     }
 	
@@ -516,8 +497,8 @@ BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
     return(x)
 }
 
-.BSA.post_nested <- function(data, omega, interval, nbackg, dim, normp) {
-    tpoints = .BSA.linspace(interval, length(data) * interval, length(data))
+.BSA.post_nested <- function(data, omega, tpoints, nbackg, dim, normp) {
+    tpoints = .BSA.linspace(tpoints, length(data) * tpoints, length(data))
     fpoints = .BSA.samplepoint(tpoints, omega, nbackg)
     r = .BSA.prob(data, fpoints, normp)
 	normp = max(r$logST)
@@ -526,15 +507,15 @@ BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
     return(logp)
 }
 
-.BSA.loglikelihood <- function(data, omega, interval, nbackg, dim) {
-    ll = .BSA.post_nested(data, omega, interval, nbackg, dim, 0)
+.BSA.loglikelihood <- function(data, omega, tpoints, nbackg, dim) {
+    ll = .BSA.post_nested(data, omega, tpoints, nbackg, dim, 0)
     return(ll)
 }
 
-.BSA.getLLHoods <- function(data, x, interval, nbackg, dim) {
+.BSA.getLLHoods <- function(data, x, tpoints, nbackg, dim) {
     llvalues = numeric()
     for(i in c(1:length(x))) {
-        llvalues[i] = .BSA.loglikelihood(data, x[i], interval, nbackg, dim)
+        llvalues[i] = .BSA.loglikelihood(data, x[i], tpoints, nbackg, dim)
     }
     return(llvalues)
 } 
@@ -548,16 +529,16 @@ BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
     return(sum)
 }
 
-.BSA.explore <- function(data, x, omega_min, omega_max, logLhoodMin, dim, interval, nbackg) {
+.BSA.explore <- function(data, x, omega_min, omega_max, logLhoodMin, dim, tpoints, nbackg) {
     step = 0.1
     m = 20
     accept = 0
     reject = 0
-    xLL=.BSA.loglikelihood(data, x, interval, nbackg, dim)
+    xLL=.BSA.loglikelihood(data, x, tpoints, nbackg, dim)
     for (i in c(1:m)) {
         tryx = rnorm(1, x, step)
         tryx = omega_min + (tryx-omega_min) %% (omega_max-omega_min)
-        tryxLL = .BSA.loglikelihood(data, tryx, interval, nbackg, dim)
+        tryxLL = .BSA.loglikelihood(data, tryx, tpoints, nbackg, dim)
         if (tryxLL > logLhoodMin) {
             x = tryx
             xLL = tryxLL
@@ -604,9 +585,9 @@ BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
     return(list(weight=weight, momega=momega, stomega=stomega, mperiod=mperiod, stperiod=stperiod))
 }
 
-.BSA.evidence <- function(data, omega_min, omega_max, dim, nsamples, nbackg, interval, nposts) {
+.BSA.evidence <- function(data, omega_min, omega_max, dim, nsamples, nbackg, tpoints, nposts) {
     samples = .BSA.prior(omega_min, omega_max, dim, nsamples)
-    samplesLLHoods = .BSA.getLLHoods(data, samples, interval, nbackg, dim)
+    samplesLLHoods = .BSA.getLLHoods(data, samples, tpoints, nbackg, dim)
     samplesLWeights = array(0, nsamples)
     posts = array(0, nposts)
     postsLWeights = array(0, nposts)
@@ -633,7 +614,7 @@ BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
         }
         LLHoodmin = samplesLLHoods[worst]
         samples[worst] = samples[newi]
-        r = .BSA.explore(data, samples[worst], omega_min, omega_max, LLHoodmin, dim, interval, nbackg)
+        r = .BSA.explore(data, samples[worst], omega_min, omega_max, LLHoodmin, dim, tpoints, nbackg)
         samples[worst] = r$x
         samplesLLHoods[worst] = r$xLL
         logwidth = logwidth - 1.0/nsamples
@@ -651,10 +632,10 @@ BaSAR.local <- function(data, start, stop, nsamples, interval, window) {
     return(list(samples=samples,weight=samplesLLHoods,logZ=logZ, logZerror=logZerror, momega=momega, stomega=stomega, mperiod=mperiod, stperiod=stperiod))
 }
 
-BaSAR.nest <- function(data, start, stop, nsamples, nbackg, interval, nposts) {
+BaSAR.nest <- function(data, start, stop, nsamples, nbackg, tpoints, nposts) {
 	start2 <- ((2*pi)/stop)
     stop2 <- ((2*pi)/start)
-    r = .BSA.evidence(data, start2, stop2, 1, nsamples, nbackg, interval, nposts)
+    r = .BSA.evidence(data, start2, stop2, 1, nsamples, nbackg, tpoints, nposts)
 
     return(list(samples=r$samples,weights=r$weight,logZ=r$logZ,logZerror=r$logZerror,momega=r$momega,stomega=r$stomega))
 }

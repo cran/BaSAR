@@ -4,7 +4,7 @@
 \title{Local BSA}
 \description{A windowed BSA that computes the frequency locally.}
 \usage{
-BaSAR.local(data, start, stop, nsamples, interval, window)
+BaSAR.local(data, start, stop, nsamples, tpoints, nbackg, window)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -12,7 +12,8 @@ BaSAR.local(data, start, stop, nsamples, interval, window)
   \item{start}{lower limit of period of interest, in seconds}
   \item{stop}{upper limit of period of interest, in seconds}
   \item{nsamples}{number of samples within the interval start-stop}
-  \item{interval}{interval between data points, in seconds}
+  \item{tpoints}{vector of time points, in seconds}
+  \item{nbackg}{number of background functions to be added to the model}
   \item{window}{length of window, in number of data points}
 }
 \details{
@@ -56,7 +57,7 @@ for (i in 1:200) { dpoints[i] <- sin((0.5+i*0.005)*i) }
 # Plot time series
 plot(dpoints, type="l", col="blue", xlab="t", ylab="d(t)")
 # Run BaSAR with windowing to get 2D posterior over omega and time
-r <- BaSAR.local(dpoints, 2, 30, 100, 1, 10)
+r <- BaSAR.local(dpoints, 2, 30, 100, tpoints, 0, 10)
 # Plot the resulting 2D posterior density function
 # with time on x-axis and omega on y-axis
 require(fields)

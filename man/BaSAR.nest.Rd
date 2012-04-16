@@ -4,7 +4,7 @@
 \title{BSA with nested sampling}
 \description{BSA using nested sampling to calculate the evidence.}
 \usage{
-BaSAR.nest(data, start, stop, nsamples, nbackg, interval, nposts)
+BaSAR.nest(data, start, stop, nsamples, nbackg, tpoints, nposts)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -13,7 +13,7 @@ BaSAR.nest(data, start, stop, nsamples, nbackg, interval, nposts)
   \item{stop}{upper limit of period of interest, in seconds}
   \item{nsamples}{number of samples within the interval start-stop}
   \item{nbackg}{number of background functions to be added to the model}
-  \item{interval}{interval between data points, in seconds}
+  \item{tpoints}{vector of time points, in seconds}
   \item{nposts}{number of samples to draw from the posterior}
 }
 \details{
@@ -57,7 +57,7 @@ dpoints = sin(0.5 * tpoints) +sin(0.3 * tpoints) + 0.1 * rnorm(200, 0, 1)
 # Plot time series
 plot(dpoints, type="l", col="blue", xlab="t", ylab="d(t)")
 # Run BaSAR with nested sampling to estimate mean omega and evidence
-r = BaSAR.nest(dpoints, 6, 600, 100, 0, 1, 500)
+r = BaSAR.nest(dpoints, 6, 600, 100, 0, tpoints, 500)
 # Plot samples drawn from probability distribution
 plot(r$samples,exp(r$weight),type="h",pch=20, col="red", ylab="",
 xlab=expression(omega),xlim=c(0,1),ylim=c(0,max(exp(r$weight))))

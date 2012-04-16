@@ -1,8 +1,8 @@
 Package: BaSAR
 Type: Package
 Title: Bayesian Spectrum Analysis in R
-Version: 1.1
-Date: 2012-01-09
+Version: 1.2
+Date: 2012-04-16
 Author: Emma Granqvist, Matthew Hartley and Richard J Morris
 Maintainer: Emma Granqvist <emma.granqvist@jic.ac.uk>
 Description: Bayesian Spectrum Analysis of time series data
@@ -10,6 +10,6 @@ Depends: polynom, orthopolynom
 Suggests: fields
 License: GPL-2
 LazyLoad: yes
-Packaged: 2012-01-09 15:52:16 UTC; granqvie
+Packaged: 2012-04-15 11:40:05 UTC; granqvie
 Repository: CRAN
-Date/Publication: 2012-01-09 16:57:31
+Date/Publication: 2012-04-15 14:59:14

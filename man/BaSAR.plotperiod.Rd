@@ -43,7 +43,7 @@ dpoints = sin(0.5 * tpoints) + 0.1 * rnorm(200, 0, 1)
 # Plot time series
 plot(dpoints, type="l", col="blue", xlab="t", ylab="d(t)")
 # Run BaSAR to get normalized posterior distirbution
-r <- BaSAR.post(dpoints, 6, 30, 100, 0, 1)
+r <- BaSAR.post(dpoints, 6, 30, 100, 0, tpoints)
 # Plot the resulting posterior density function
 plot(r$omega, r$normp, xlim=c(0:1), type="h", col="red", ylab="PDF",
 xlab=expression(omega))
