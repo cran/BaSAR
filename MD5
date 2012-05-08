@@ -1,6 +1,8 @@
-00a9af1949e36cab1d57d0a168b37232 *DESCRIPTION
+e33b33f5f3402608f52fc10be6ef6094 *DESCRIPTION
 8b54e5a89fbda3af5e077053d40bec76 *NAMESPACE
 2d2c063b09a476d541381a96502438b7 *R/BaSAR.R
+9a3f3e1c5baa3c93ee5f1972d3d93060 *data/tutorial.2.txt
+676123f633aea3153801749ef4a5e2dd *data/tutorial.txt
 0cf21de5942cbbd807ecf654e533a60a *inst/CITATION
 e3916da19bd526d1f57adcd0d929b241 *man/BaSAR-package.Rd
 903fcceb5f58ec9df747249b0bf0d0a4 *man/BaSAR.auto.Rd
@@ -10,3 +12,5 @@ cac187d3bdf365cf19ab85f91d1bdd5f *man/BaSAR.fine.Rd
 18fe03d2d957cbb15c2719e50a2e7f7f *man/BaSAR.nest.Rd
 ad6c02c3874dc6397aada71cbe09c1f1 *man/BaSAR.plotperiod.Rd
 a7c9603c86f4731174a9e9bb015692cd *man/BaSAR.post.Rd
+d2c7bb3558dec9ab21597a6e0afd8e28 *man/tutorial.2.Rd
+cb7b1131318441d1c948dd04c5db8d3f *man/tutorial.Rd
